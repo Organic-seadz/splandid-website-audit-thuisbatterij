@@ -1,6 +1,8 @@
 import FirecrawlApp from '@mendable/firecrawl-js'
 
-const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY! })
+function getFirecrawl() {
+  return new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY! })
+}
 
 const SUBPAGE_KEYWORDS = ['thuisbatterij', 'batterij', 'zonnepanelen', 'solar', 'accu', 'opslag']
 
@@ -12,7 +14,7 @@ export interface ScrapeResult {
 
 export async function scrapeWebsite(url: string): Promise<ScrapeResult> {
   // 1. Scrape homepage - get markdown and links
-  const homepageResult = await firecrawl.scrapeUrl(url, {
+  const homepageResult = await getFirecrawl().scrapeUrl(url, {
     formats: ['markdown', 'links'],
   })
 
@@ -30,7 +32,7 @@ export async function scrapeWebsite(url: string): Promise<ScrapeResult> {
 
   if (subpageUrl && subpageUrl !== url) {
     try {
-      const subpageResult = await firecrawl.scrapeUrl(subpageUrl, {
+      const subpageResult = await getFirecrawl().scrapeUrl(subpageUrl, {
         formats: ['markdown'],
       })
       subpage_content = (subpageResult as { markdown?: string }).markdown || null
