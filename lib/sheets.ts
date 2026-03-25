@@ -28,8 +28,7 @@ export interface SheetRow {
 export async function saveToSheets(row: SheetRow): Promise<void> {
   const webhookUrl = process.env.SHEETS_WEBHOOK_URL
   if (!webhookUrl) {
-    console.warn('SHEETS_WEBHOOK_URL not configured, skipping sheets save')
-    return
+    throw new Error('SHEETS_WEBHOOK_URL is niet geconfigureerd')
   }
 
   const response = await fetch(webhookUrl, {
@@ -38,7 +37,9 @@ export async function saveToSheets(row: SheetRow): Promise<void> {
     body: JSON.stringify(row),
   })
 
+  const responseText = await response.text()
+
   if (!response.ok) {
-    console.error('Failed to save to sheets:', response.status, await response.text())
+    throw new Error('Sheets webhook fout ' + response.status + ': ' + responseText.slice(0, 200))
   }
 }
