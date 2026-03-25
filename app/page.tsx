@@ -57,7 +57,16 @@ export default function HomePage() {
         body: JSON.stringify(payload),
       })
 
-      const data = await res.json()
+      if (res.status === 504 || res.status === 502) {
+        throw new Error('De analyse duurde te lang. Probeer het opnieuw — dit kan soms voorkomen bij grote websites.')
+      }
+
+      let data: { success: boolean; error?: string }
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error('Er is een onverwachte fout opgetreden. Controleer of de website URL correct is en probeer opnieuw.')
+      }
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Er is een fout opgetreden. Probeer het opnieuw.')
