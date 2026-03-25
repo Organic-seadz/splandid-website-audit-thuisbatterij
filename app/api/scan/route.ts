@@ -70,7 +70,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Scan error:', error)
+    const msg = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : ''
+    console.error('Scan error:', msg, stack)
 
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
