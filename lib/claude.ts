@@ -253,7 +253,7 @@ Use orderwaarde: €${input.orderwaarde.toLocaleString('nl-NL')} for all revenue
 Return only valid JSON, no other text.`
 
   const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userMessage }],
