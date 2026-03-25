@@ -23,7 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-navy font-sans antialiased">{children}</body>
+      <body className="bg-white font-sans antialiased">{children}</body>
     </html>
   )
 }

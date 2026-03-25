@@ -4,11 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --navy: #0B1120;
-  --orange: #F97316;
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
@@ -19,13 +14,13 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background-color: #0B1120;
+  background-color: #ffffff;
   font-family: 'Inter', sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-navy text-white;
+    @apply bg-white text-gray-900;
     font-family: 'Inter', sans-serif;
   }
 }

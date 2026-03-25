@@ -9,8 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        navy: '#0B1120',
-        orange: '#F97316',
+        brand: '#20267f',
+        secondary: '#0281b3',
+        orange: '#fe6500',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

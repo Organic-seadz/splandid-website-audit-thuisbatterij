@@ -58,14 +58,14 @@ export default function HomePage() {
       })
 
       if (res.status === 504 || res.status === 502) {
-        throw new Error('De analyse duurde te lang. Probeer het opnieuw — dit kan soms voorkomen bij grote websites.')
+        throw new Error('De analyse duurde te lang. Probeer het opnieuw.')
       }
 
       let data: { success: boolean; error?: string }
       try {
         data = await res.json()
       } catch {
-        throw new Error('Er is een onverwachte fout opgetreden. Controleer of de website URL correct is en probeer opnieuw.')
+        throw new Error('Er is een onverwachte fout opgetreden. Controleer de URL en probeer opnieuw.')
       }
 
       if (!res.ok || !data.success) {
@@ -84,23 +84,21 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-navy relative">
+    <main className="min-h-screen bg-white relative">
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-navy/95 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-brand/95 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-6">
-            {/* Spinner */}
             <div className="relative w-16 h-16">
-              <div className="absolute inset-0 rounded-full border-4 border-white/10" />
+              <div className="absolute inset-0 rounded-full border-4 border-white/20" />
               <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-orange animate-spin" />
             </div>
             <div className="text-center">
               <p className="text-white text-xl font-semibold mb-2">Website wordt geanalyseerd...</p>
-              <p className="text-gray-400 text-sm max-w-xs text-center">
+              <p className="text-white/70 text-sm max-w-xs text-center">
                 We scrapen uw website, analyseren 6 conversiecriteria en berekenen uw omzetpotentieel.
               </p>
             </div>
-            {/* Progress dots */}
             <div className="flex gap-2 mt-2">
               <span className="w-2 h-2 rounded-full bg-orange animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-2 h-2 rounded-full bg-orange animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -110,22 +108,19 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
-        {/* Logo */}
-        <div className="mb-10">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-orange text-2xl font-bold tracking-tight">Splandid</span>
-          </div>
-          <p className="text-gray-500 text-sm">Website Audit voor Thuisbatterij-installateurs</p>
-        </div>
+      {/* Header */}
+      <div className="bg-brand py-4 px-6">
+        <span className="text-white text-xl font-bold tracking-tight">Splandid</span>
+      </div>
 
+      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
         {/* Hero */}
         <div className="mb-10">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-4 text-balance">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight mb-4 text-balance">
             Ontdek wat uw website{' '}
-            <span className="text-orange">u kost</span>
+            <span style={{ color: '#fe6500' }}>u kost</span>
           </h1>
-          <p className="text-gray-400 text-lg leading-relaxed">
+          <p className="text-gray-600 text-lg leading-relaxed">
             Wij analyseren uw website op 6 conversiecriteria en laten u zien wat u per jaar misloopt.
           </p>
         </div>
@@ -133,150 +128,121 @@ export default function HomePage() {
         {/* Trust badges */}
         <div className="flex flex-wrap gap-4 mb-10">
           {[
-            { icon: '✓', text: 'Gratis analyse' },
-            { icon: '✓', text: 'Geen verplichtingen' },
-            { icon: '✓', text: 'Rapport binnen 10 minuten' },
-          ].map((badge) => (
-            <div key={badge.text} className="flex items-center gap-1.5 text-sm text-gray-300">
-              <span className="text-orange font-bold">{badge.icon}</span>
-              <span>{badge.text}</span>
+            'Gratis analyse',
+            'Geen verplichtingen',
+            'Rapport binnen 10 minuten',
+          ].map((text) => (
+            <div key={text} className="flex items-center gap-1.5 text-sm text-gray-600">
+              <span className="font-bold" style={{ color: '#fe6500' }}>✓</span>
+              <span>{text}</span>
             </div>
           ))}
         </div>
 
         {/* Form Card */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8">
+        <div className="rounded-2xl p-6 sm:p-8" style={{ backgroundColor: '#20267f' }}>
           <h2 className="text-white font-semibold text-lg mb-6">Vul uw gegevens in</h2>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-red-400 text-sm font-medium">Fout bij analyse</p>
-              <p className="text-red-300 text-sm mt-1">{error}</p>
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-400/40 rounded-lg">
+              <p className="text-red-200 text-sm font-medium">Fout bij analyse</p>
+              <p className="text-red-100 text-sm mt-1">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {/* Naam */}
             <div>
-              <label htmlFor="naam" className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="naam" className="block text-sm font-medium text-white/80 mb-1.5">
                 Uw naam
               </label>
               <input
-                id="naam"
-                name="naam"
-                type="text"
-                required
-                value={formData.naam}
-                onChange={handleChange}
+                id="naam" name="naam" type="text" required
+                value={formData.naam} onChange={handleChange}
                 placeholder="Jan de Vries"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
             </div>
 
             {/* Bedrijfsnaam */}
             <div>
-              <label htmlFor="bedrijfsnaam" className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="bedrijfsnaam" className="block text-sm font-medium text-white/80 mb-1.5">
                 Bedrijfsnaam
               </label>
               <input
-                id="bedrijfsnaam"
-                name="bedrijfsnaam"
-                type="text"
-                required
-                value={formData.bedrijfsnaam}
-                onChange={handleChange}
+                id="bedrijfsnaam" name="bedrijfsnaam" type="text" required
+                value={formData.bedrijfsnaam} onChange={handleChange}
                 placeholder="Solar Installaties B.V."
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
             </div>
 
             {/* Website URL */}
             <div>
-              <label htmlFor="url" className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="url" className="block text-sm font-medium text-white/80 mb-1.5">
                 Website URL
               </label>
               <input
-                id="url"
-                name="url"
-                type="url"
-                required
-                value={formData.url}
-                onChange={handleChange}
+                id="url" name="url" type="url" required
+                value={formData.url} onChange={handleChange}
                 placeholder="https://www.uwbedrijf.nl"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
             </div>
 
             {/* E-mailadres */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-1.5">
                 E-mailadres
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
+                id="email" name="email" type="email" required
+                value={formData.email} onChange={handleChange}
                 placeholder="jan@uwbedrijf.nl"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
             </div>
 
             {/* Bezoekers */}
             <div>
-              <label htmlFor="bezoekers" className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="bezoekers" className="block text-sm font-medium text-white/80 mb-1.5">
                 Gemiddeld aantal bezoekers per maand
               </label>
               <input
-                id="bezoekers"
-                name="bezoekers"
-                type="number"
-                min="1"
-                required
-                value={formData.bezoekers}
-                onChange={handleChange}
+                id="bezoekers" name="bezoekers" type="number" min="1" required
+                value={formData.bezoekers} onChange={handleChange}
                 placeholder="bijv. 800"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
             </div>
 
             {/* Aanvragen */}
             <div>
-              <label htmlFor="aanvragen" className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="aanvragen" className="block text-sm font-medium text-white/80 mb-1.5">
                 Gemiddeld aantal online aanvragen per maand{' '}
-                <span className="text-gray-500 font-normal">(optioneel — voor persoonlijkere impactberekening)</span>
+                <span className="text-white/40 font-normal">(optioneel)</span>
               </label>
               <input
-                id="aanvragen"
-                name="aanvragen"
-                type="number"
-                min="0"
-                value={formData.aanvragen}
-                onChange={handleChange}
+                id="aanvragen" name="aanvragen" type="number" min="0"
+                value={formData.aanvragen} onChange={handleChange}
                 placeholder="bijv. 12"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
             </div>
 
             {/* Orderwaarde */}
             <div>
-              <label htmlFor="orderwaarde" className="block text-sm font-medium text-gray-300 mb-1.5">
-                Gemiddelde orderwaarde in &euro;{' '}
-                <span className="text-gray-500 font-normal">(optioneel — voor persoonlijkere impactberekening)</span>
+              <label htmlFor="orderwaarde" className="block text-sm font-medium text-white/80 mb-1.5">
+                Gemiddelde orderwaarde in €{' '}
+                <span className="text-white/40 font-normal">(optioneel)</span>
               </label>
               <input
-                id="orderwaarde"
-                name="orderwaarde"
-                type="number"
-                min="1"
-                value={formData.orderwaarde}
-                onChange={handleChange}
+                id="orderwaarde" name="orderwaarde" type="number" min="1"
+                value={formData.orderwaarde} onChange={handleChange}
                 placeholder="6500"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange/60 focus:ring-1 focus:ring-orange/40 transition-colors"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/60 focus:ring-1 focus:ring-white/40 transition-colors"
               />
-              <p className="mt-1.5 text-xs text-gray-500">Standaardwaarde: €6.500 per installatie</p>
+              <p className="mt-1.5 text-xs text-white/40">Standaardwaarde: €6.500 per installatie</p>
             </div>
 
             {/* Submit */}
@@ -284,7 +250,8 @@ export default function HomePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-orange hover:bg-orange/90 disabled:bg-orange/50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-orange/20 hover:shadow-orange/30"
+                className="w-full text-white font-semibold py-4 px-6 rounded-lg text-base transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#fe6500' }}
               >
                 {isLoading ? (
                   <>
@@ -309,10 +276,7 @@ export default function HomePage() {
           <p className="text-gray-500 text-sm leading-relaxed">
             De analyse is volledig gratis en zonder verplichtingen.
             <br />
-            U ontvangt het rapport binnen 10 minuten op uw e-mailadres.*
-          </p>
-          <p className="text-gray-600 text-xs mt-3">
-            * Het rapport wordt direct na de analyse per e-mail verzonden door Splandid.
+            U ontvangt het rapport binnen 10 minuten op uw e-mailadres.
           </p>
         </div>
       </div>
