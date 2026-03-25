@@ -16,65 +16,94 @@ const schema = z.object({
   orderwaarde: z.number().positive('Orderwaarde moet een positief getal zijn').default(6500),
 })
 
+function safeLog(label: string, value: unknown) {
+  try {
+    process.stdout.write(label + ': ' + (typeof value === 'string' ? value : JSON.stringify(value)) + '\n')
+  } catch {
+    process.stdout.write(label + ': [onlogbaar]\n')
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const data = schema.parse(body)
 
+    safeLog('STAP 1', 'Validatie OK, start scrape van ' + data.url)
+
     // Scrape website
-    const scraped = await scrapeWebsite(data.url)
+    let scraped
+    try {
+      scraped = await scrapeWebsite(data.url)
+      safeLog('STAP 2', 'Scrape OK, homepage lengte: ' + scraped.homepage_content.length)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      safeLog('STAP 2 FOUT', msg)
+      return NextResponse.json({ success: false, error: 'Website scrapen mislukt: ' + msg }, { status: 500 })
+    }
 
     // Run audit
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const auditResult = (await runAudit({
-      bedrijfsnaam: data.bedrijfsnaam,
-      url: data.url,
-      bezoekers_per_maand: data.bezoekers ?? null,
-      aanvragen_per_maand: data.aanvragen ?? null,
-      orderwaarde: data.orderwaarde,
-      homepage_content: scraped.homepage_content,
-      subpage_content: scraped.subpage_content,
-      subpage_url: scraped.subpage_url,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    })) as any
+    let auditResult: any
+    try {
+      auditResult = await runAudit({
+        bedrijfsnaam: data.bedrijfsnaam,
+        url: data.url,
+        bezoekers_per_maand: data.bezoekers ?? null,
+        aanvragen_per_maand: data.aanvragen ?? null,
+        orderwaarde: data.orderwaarde,
+        homepage_content: scraped.homepage_content,
+        subpage_content: scraped.subpage_content,
+        subpage_url: scraped.subpage_url,
+      })
+      safeLog('STAP 3', 'Claude audit OK, score: ' + auditResult?.overall_score)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      safeLog('STAP 3 FOUT', msg)
+      return NextResponse.json({ success: false, error: 'Analyse mislukt: ' + msg }, { status: 500 })
+    }
 
-    // Save to Google Sheets via webhook
-    await saveToSheets({
-      naam: data.naam,
-      bedrijfsnaam: data.bedrijfsnaam,
-      url: data.url,
-      email: data.email,
-      bezoekers: data.bezoekers ?? null,
-      aanvragen: data.aanvragen ?? null,
-      orderwaarde: data.orderwaarde,
-      datum: new Date().toISOString().split('T')[0],
-      overall_score: auditResult?.overall_score ?? null,
-      conversie_ratio: auditResult?.conversie?.ratio ?? null,
-      conversie_oordeel: auditResult?.conversie?.oordeel ?? null,
-      score_kooptrigger: auditResult?.criteria?.kooptrigger_urgentie?.score ?? null,
-      score_prijs: auditResult?.criteria?.prijs_terugverdientijd?.score ?? null,
-      score_batterijadvies: auditResult?.criteria?.batterijadvies_maatwerk?.score ?? null,
-      score_aanvraag: auditResult?.criteria?.aanvraag_online_conversie?.score ?? null,
-      score_proces: auditResult?.criteria?.proces_verwachting?.score ?? null,
-      score_vertrouwen: auditResult?.criteria?.vertrouwen_bewijs?.score ?? null,
-      top3_actie_1: auditResult?.top3_prioriteiten?.[0]?.actie ?? null,
-      top3_actie_2: auditResult?.top3_prioriteiten?.[1]?.actie ?? null,
-      top3_actie_3: auditResult?.top3_prioriteiten?.[2]?.actie ?? null,
-      potentiele_jaaromzet_laag:
-        auditResult?.impact_samenvatting?.potentiele_extra_jaaromzet?.laag ?? null,
-      potentiele_jaaromzet_hoog:
-        auditResult?.impact_samenvatting?.potentiele_extra_jaaromzet?.hoog ?? null,
-      slotoordeel: auditResult?.slotoordeel ?? null,
-      full_json: JSON.stringify(auditResult),
-    })
+    // Save to Google Sheets
+    try {
+      await saveToSheets({
+        naam: data.naam,
+        bedrijfsnaam: data.bedrijfsnaam,
+        url: data.url,
+        email: data.email,
+        bezoekers: data.bezoekers ?? null,
+        aanvragen: data.aanvragen ?? null,
+        orderwaarde: data.orderwaarde,
+        datum: new Date().toISOString().split('T')[0],
+        overall_score: auditResult?.overall_score ?? null,
+        conversie_ratio: auditResult?.conversie?.ratio ?? null,
+        conversie_oordeel: auditResult?.conversie?.oordeel ?? null,
+        score_kooptrigger: auditResult?.criteria?.kooptrigger_urgentie?.score ?? null,
+        score_prijs: auditResult?.criteria?.prijs_terugverdientijd?.score ?? null,
+        score_batterijadvies: auditResult?.criteria?.batterijadvies_maatwerk?.score ?? null,
+        score_aanvraag: auditResult?.criteria?.aanvraag_online_conversie?.score ?? null,
+        score_proces: auditResult?.criteria?.proces_verwachting?.score ?? null,
+        score_vertrouwen: auditResult?.criteria?.vertrouwen_bewijs?.score ?? null,
+        top3_actie_1: auditResult?.top3_prioriteiten?.[0]?.actie ?? null,
+        top3_actie_2: auditResult?.top3_prioriteiten?.[1]?.actie ?? null,
+        top3_actie_3: auditResult?.top3_prioriteiten?.[2]?.actie ?? null,
+        potentiele_jaaromzet_laag: auditResult?.impact_samenvatting?.potentiele_extra_jaaromzet?.laag ?? null,
+        potentiele_jaaromzet_hoog: auditResult?.impact_samenvatting?.potentiele_extra_jaaromzet?.hoog ?? null,
+        slotoordeel: auditResult?.slotoordeel ?? null,
+        full_json: JSON.stringify(auditResult),
+      })
+      safeLog('STAP 4', 'Sheets opgeslagen')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      safeLog('STAP 4 FOUT', msg)
+      // Sheets failure is non-fatal — still return success to user
+    }
 
     return NextResponse.json({ success: true })
+
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
-    const stack = error instanceof Error ? error.stack : ''
-    console.error('Scan error:', msg, stack)
+    safeLog('ALGEMENE FOUT', msg)
 
-    // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       const firstError = error.errors[0]
       return NextResponse.json(
@@ -84,10 +113,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Onbekende fout opgetreden',
-      },
+      { success: false, error: msg || 'Onbekende fout opgetreden' },
       { status: 500 }
     )
   }
